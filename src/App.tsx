@@ -1,12 +1,30 @@
 
-import SignUpForm from './components/auth/SignUpForm'
+import SignInForm from '@/components/auth/SignInForm'
+import SignUpForm from '@/components/auth/SignUpForm'
+import useAuthStore from './stores/auth.store'
+import { useEffect } from 'react'
 
-function Page() {
-  
+function App() {
+  const { initialize, loading, user } = useAuthStore()
+
+  useEffect(() => {
+    initialize()
+  }, [initialize])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (user) {
+    return <div>Welcome, {user.email}!</div>
+  }
 
   return (
-    <SignUpForm />
+    <>
+      <SignUpForm />
+      <SignInForm />
+    </>
   )
 }
 
-export default Page
+export default App
