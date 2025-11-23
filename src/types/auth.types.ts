@@ -3,6 +3,7 @@ import type { User, Session } from '@supabase/supabase-js'
 
 export interface AuthState {
   user: User | null
+  role: Role | null
   session: Session | null
   loading: boolean
 }

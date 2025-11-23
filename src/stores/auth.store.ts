@@ -2,10 +2,20 @@
 import { create } from 'zustand'
 import supabase from '@/utils/supabase'
 import type { AuthStore, Role } from '../types/auth.types'
-import { AuthError } from '@supabase/supabase-js'
+import { AuthError, type Session } from '@supabase/supabase-js'
+
+async function getUserRoleFromSession(session: Session | null): Promise<Role | null> {
+  const { data, error } = await supabase.from('profiles').select('role').eq('user_id', session?.user.id).single();
+  if(error) {
+    throw error;
+  }
+
+  return (data.role as Role) || null;
+}
 
 const useAuthStore = create<AuthStore>((set) => ({
   user: null,
+  role: null,
   session: null,
   loading: true,
 
@@ -15,16 +25,19 @@ const useAuthStore = create<AuthStore>((set) => ({
       
       if (error) throw error
 
+      const role = await getUserRoleFromSession(session);
+
       set({ 
         session, 
-        user: session?.user ?? null, 
+        user: session?.user ?? null,
+        role: role ?? null,
         loading: false 
       })
 
       supabase.auth.onAuthStateChange((_event, session) => {
         set({ 
           session, 
-          user: session?.user ?? null 
+          user: session?.user ?? null
         })
       })
     } catch (error) {
@@ -40,10 +53,13 @@ const useAuthStore = create<AuthStore>((set) => ({
     })
     
     if (error) throw error
+
+    const role = await getUserRoleFromSession(data.session);
     
     set({ 
       session: data.session, 
-      user: data.user 
+      user: data.user,
+      role: role ?? null
     })
   },
 
