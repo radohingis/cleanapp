@@ -1,5 +1,6 @@
 
 import Header from './components/Header'
+import { ThemeProvider } from './components/theme.provider'
 import useAuthStore from './stores/auth.store'
 import { useEffect } from 'react'
 
@@ -11,9 +12,9 @@ function App() {
   }, [initialize])
 
   return (
-    <>
+    <ThemeProvider>
       <Header />
-    </>
+    </ThemeProvider>
   )
 }
 
