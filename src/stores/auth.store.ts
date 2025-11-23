@@ -2,6 +2,7 @@
 import { create } from 'zustand'
 import supabase from '@/utils/supabase'
 import type { AuthStore, Role } from '../types/auth.types'
+import { AuthError } from '@supabase/supabase-js'
 
 const useAuthStore = create<AuthStore>((set) => ({
   user: null,
@@ -56,6 +57,10 @@ const useAuthStore = create<AuthStore>((set) => ({
     })
     
     if (error) throw error
+
+    if(data?.user?.identities?.length === 0) {
+      throw new AuthError('An account with this email already exists. Please sign in instead.', 409, 'user_already_exists')
+    }
     
     set({ 
       session: data.session, 

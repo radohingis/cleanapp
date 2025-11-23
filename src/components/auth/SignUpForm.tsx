@@ -8,9 +8,10 @@ import { FieldError } from '@/components/ui/field'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useAuthStore from '@/stores/auth.store'
 import type { Role } from '@/types/auth.types'
+import { AuthError } from '@supabase/supabase-js'
 
-function SignUpForm() {
-  const [role, setRole] = useState<Role>('client');
+function SignUpForm({ onSwitchToSignIn, onSubmitError }: { onSwitchToSignIn?: () => void, onSubmitError?: (error: AuthError | null) => void }) {
+  const [role, setRole] = useState<Role>('supplier');
 
   const authStore = useAuthStore()
 
@@ -23,8 +24,10 @@ function SignUpForm() {
     onSubmit: async ({ value }) => {
       try {
         await authStore.signUp(value.email, value.password, role);
+        await authStore.signIn(value.email, value.password);
+        onSubmitError?.(null);
       } catch (error) {
-        console.error('Error signing up:', error)
+        onSubmitError?.(error as AuthError);
       }
     }
   })
@@ -144,14 +147,18 @@ function SignUpForm() {
             )
           }}
         />
-        <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
-            <Button type="submit" disabled={!canSubmit || isSubmitting}>
-              {isSubmitting ? 'Signing Up...' : 'Sign Up'}
-            </Button>
-          )}
-        />
+        
+        <div className="flex items-center gap-x-2">
+          {onSwitchToSignIn && <p className="text-muted-foreground text-sm">Already have an account? <Button variant="link" className="p-0" onClick={onSwitchToSignIn}>Sign In</Button></p>}
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => (
+              <Button type="submit" disabled={!canSubmit || isSubmitting} className="ml-auto">
+                {isSubmitting ? 'Signing Up...' : 'Sign Up'}
+              </Button>
+            )}
+          />
+        </div>
       </form>
     </>
   )
