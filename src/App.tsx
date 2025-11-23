@@ -1,5 +1,5 @@
 
-import Header from './components/Header'
+import Header from './components/header/Header'
 import useAuthStore from './stores/auth.store'
 import { useEffect } from 'react'
 
